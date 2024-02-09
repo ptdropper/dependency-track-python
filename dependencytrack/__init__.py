@@ -69,6 +69,10 @@ class DependencyTrack(Projects, Components, Licenses):
         :raises DependencyTrackApiError: if the REST call failed
         """
         response = self.session.get(self.api + f"/search/{query}", params=self.paginated_param_payload)
+
+        print("response" + response.text)
+        print("search " + self.api + f"/search/{query}")
+
         if response.status_code == 200:
             return response.json()['results']
         else:

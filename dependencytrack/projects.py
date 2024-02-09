@@ -1,6 +1,6 @@
 # Copyright 2020 Alvin Chen sonoma001@gmail.com
 # SPDX-License-Identifier: GPL-2.0+
-
+import io
 import logging
 
 from .exceptions import AuthorizationError, DependencyTrackApiError
@@ -22,6 +22,7 @@ class Projects:
         :raises DependencyTrackApiError: if the REST call failed
         """
         response = self.session.get(self.api + "/project", params=self.paginated_param_payload)
+
         if response.status_code == 200:
             return response.json()
         else:
@@ -84,4 +85,34 @@ class Projects:
         else:
             description = f"Error while getting project {uuid}"
             raise DependencyTrackApiError(description, response)
+
+    def get_project_vdr(self, uuid, name, version):
+        """Get vdr file of project.
+
+        example command line method:
+        curl -H 
+            'X-Api-Key: XrnGcCSFoCzhHFX7vWu0hD4IisDeFrQl' 
+            -H 'Accept application/vnd.cyclonedx+xml' 
+            'http://192.168.1.24:8081/api/v1/bom/cyclonedx/project/b9213f2b-c073-4b24-b03e-30ea4e65664f?variant=vdr'        
+        API Endpoint: GET /v1/bom/cyclonedx/project/{project_uuid}
+    
+        :param uuid: the ID of the project to be analysed
+        :type uuid: uuid string
+        :return: the requested VDR data
+        :rtype: a file
+        :raises DependencyTrackApiError: if the REST call failed
+        """
+        response = self.session.get(self.api + f"/bom/cyclonedx/project/{uuid}" + "?variant=vdr", \
+                                    params=self.paginated_param_payload)
+        with io.open((name + "_" + version + "_VDR.json"),"w",encoding='utf-8') as output_file_handle:
+            print(response.text, file=output_file_handle)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            description = f"Error while getting project {uuid}"
+            raise DependencyTrackApiError(description, response)
+
+
+
 
